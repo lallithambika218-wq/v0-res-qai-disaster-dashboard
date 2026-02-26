@@ -6,6 +6,7 @@ import { OfflineBanner } from "@/components/dashboard/offline-banner"
 import { InputPanel } from "@/components/dashboard/input-panel"
 import { KPICards } from "@/components/dashboard/kpi-cards"
 import { RiskVisualization } from "@/components/dashboard/risk-visualization"
+import { RiskHeatmap } from "@/components/dashboard/risk-heatmap"
 import { ResourceAllocation } from "@/components/dashboard/resource-allocation"
 import { ShelterRecommendation } from "@/components/dashboard/shelter-recommendation"
 import { AlertPanel } from "@/components/dashboard/alert-panel"
@@ -15,11 +16,12 @@ import type { HistoryEntry } from "@/components/dashboard/history-panel"
 import { analyzeRisk } from "@/lib/analysis-engine"
 import { DEFAULT_INPUT } from "@/lib/types"
 import type { InputData, AnalysisResult } from "@/lib/types"
+import { LanguageProvider } from "@/lib/translations"
 import { cn } from "@/lib/utils"
 
 const INITIAL_RESULT: AnalysisResult = analyzeRisk(DEFAULT_INPUT)
 
-export default function DashboardPage() {
+function DashboardContent() {
   const [input, setInput] = useState<InputData>(DEFAULT_INPUT)
   const [result, setResult] = useState<AnalysisResult>(INITIAL_RESULT)
   const [isLoading, setIsLoading] = useState(false)
@@ -95,7 +97,6 @@ export default function DashboardPage() {
       const ts = getTimestamp()
       setLastAnalyzed(ts)
 
-      // Save to history
       const entryId = `h-${Date.now()}`
       setHistory((prev) => [
         {
@@ -109,7 +110,6 @@ export default function DashboardPage() {
       ])
       setSavedResults((prev) => ({ ...prev, [entryId]: { input: { ...input }, result: data } }))
 
-      // Generate alerts based on risk level
       if (data.riskLevel === "High") {
         addAlert(
           `High Flood Risk Detected in ${input.area}. Immediate Action Required.`,
@@ -199,9 +199,7 @@ export default function DashboardPage() {
         <aside
           className={cn(
             "shrink-0 border-r border-border bg-card",
-            // Desktop: always visible
             "hidden lg:block lg:w-80 xl:w-[22rem]",
-            // Mobile: slide-in overlay
             mobileSidebarOpen &&
               "fixed inset-y-0 left-0 z-30 block w-80 animate-in slide-in-from-left shadow-xl lg:static lg:shadow-none lg:animate-none"
           )}
@@ -237,6 +235,11 @@ export default function DashboardPage() {
             />
           </section>
 
+          {/* Risk Heatmap */}
+          <section aria-label="Risk heatmap">
+            <RiskHeatmap zoneRisks={result.zoneRisks} />
+          </section>
+
           {/* Risk Visualization */}
           <section aria-label="Risk visualization">
             <RiskVisualization zoneRisks={result.zoneRisks} />
@@ -268,5 +271,13 @@ export default function DashboardPage() {
         onRestore={handleRestore}
       />
     </div>
+  )
+}
+
+export default function DashboardPage() {
+  return (
+    <LanguageProvider>
+      <DashboardContent />
+    </LanguageProvider>
   )
 }

@@ -66,7 +66,7 @@ export default function HomePage() {
         <div className="flex flex-wrap items-center justify-center gap-3 pt-2">
           <span className="inline-flex items-center gap-1.5 rounded-full border border-border bg-card px-3 py-1.5 text-xs font-medium text-muted-foreground shadow-sm">
             <Shield className="h-3.5 w-3.5 text-primary" />
-            SDG 13 &amp; 11
+            SDG 13 & 11
           </span>
           <span className="inline-flex items-center gap-1.5 rounded-full border border-border bg-card px-3 py-1.5 text-xs font-medium text-muted-foreground shadow-sm">
             <Radio className="h-3.5 w-3.5 text-primary" />

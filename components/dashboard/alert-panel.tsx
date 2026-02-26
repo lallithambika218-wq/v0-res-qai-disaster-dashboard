@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { AlertTriangle, Bell, Send, X } from "lucide-react"
+import { useTranslation } from "@/lib/translations"
 import { cn } from "@/lib/utils"
 
 export interface AlertItem {
@@ -34,6 +35,8 @@ const severityBadge = {
 }
 
 export function AlertPanel({ alerts, isOpen, onClose, onSendAlert }: AlertPanelProps) {
+  const { t } = useTranslation()
+
   if (!isOpen) return null
 
   return (
@@ -46,7 +49,7 @@ export function AlertPanel({ alerts, isOpen, onClose, onSendAlert }: AlertPanelP
           <CardHeader className="flex flex-row items-center justify-between pb-3">
             <CardTitle className="flex items-center gap-2 text-base text-card-foreground">
               <Bell className="h-4 w-4 text-primary" />
-              Alerts & Notifications
+              {t.alertsNotifications}
               {alerts.length > 0 && (
                 <Badge variant="secondary" className="text-xs">
                   {alerts.length}
@@ -60,7 +63,7 @@ export function AlertPanel({ alerts, isOpen, onClose, onSendAlert }: AlertPanelP
           <CardContent className="flex flex-col gap-3">
             <ScrollArea className="max-h-80">
               {alerts.length === 0 ? (
-                <p className="py-8 text-center text-sm text-muted-foreground">No active alerts</p>
+                <p className="py-8 text-center text-sm text-muted-foreground">{t.noActiveAlerts}</p>
               ) : (
                 <div className="flex flex-col gap-2 pr-3">
                   {alerts.map((alert) => (
@@ -108,7 +111,7 @@ export function AlertPanel({ alerts, isOpen, onClose, onSendAlert }: AlertPanelP
               className="w-full gap-2 border-primary/30 text-primary hover:bg-primary/5"
             >
               <Send className="h-4 w-4" />
-              Send Alert to Field Teams
+              {t.sendAlertToField}
             </Button>
           </CardContent>
         </Card>

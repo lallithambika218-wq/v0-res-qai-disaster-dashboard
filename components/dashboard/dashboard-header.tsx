@@ -1,10 +1,11 @@
 "use client"
 
-import { useState } from "react"
 import Image from "next/image"
 import { Bell, Radio, WifiOff, Menu, X, History } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
+import { LanguageSelector } from "@/components/dashboard/language-selector"
+import { useTranslation } from "@/lib/translations"
 import { cn } from "@/lib/utils"
 
 interface DashboardHeaderProps {
@@ -26,6 +27,8 @@ export function DashboardHeader({
   onToggleMobileSidebar,
   mobileSidebarOpen,
 }: DashboardHeaderProps) {
+  const { t } = useTranslation()
+
   return (
     <header className="sticky top-0 z-40 flex items-center justify-between border-b border-border bg-card px-4 py-2.5 shadow-sm sm:px-6">
       <div className="flex items-center gap-3">
@@ -50,10 +53,10 @@ export function DashboardHeader({
         />
         <div className="flex flex-col">
           <h1 className="text-lg font-bold tracking-tight text-card-foreground leading-tight">
-            ResQAI
+            {t.appName}
           </h1>
           <p className="hidden text-xs text-muted-foreground sm:block">
-            Disaster Response AI Dashboard
+            {t.tagline}
           </p>
         </div>
       </div>
@@ -61,7 +64,7 @@ export function DashboardHeader({
       <div className="flex items-center gap-2 sm:gap-3">
         {lastAnalyzed && (
           <span className="hidden text-xs text-muted-foreground lg:inline-flex items-center gap-1">
-            Last analyzed: {lastAnalyzed}
+            {t.lastAnalyzed}: {lastAnalyzed}
           </span>
         )}
 
@@ -80,8 +83,11 @@ export function DashboardHeader({
           ) : (
             <WifiOff className="h-3 w-3" />
           )}
-          {isOnline ? "Online" : "Offline"}
+          {isOnline ? t.online : t.offline}
         </Badge>
+
+        {/* Language selector */}
+        <LanguageSelector />
 
         {/* History button */}
         <Button
@@ -89,7 +95,7 @@ export function DashboardHeader({
           size="icon"
           className="relative h-9 w-9 text-muted-foreground hover:text-card-foreground"
           onClick={onToggleHistory}
-          aria-label="Analysis history"
+          aria-label={t.analysisHistory}
         >
           <History className="h-4 w-4" />
         </Button>
@@ -100,7 +106,7 @@ export function DashboardHeader({
           size="icon"
           className="relative h-9 w-9 text-muted-foreground hover:text-card-foreground"
           onClick={onToggleAlerts}
-          aria-label="Notifications"
+          aria-label={t.alertsNotifications}
         >
           <Bell className="h-4 w-4" />
           {alertCount > 0 && (

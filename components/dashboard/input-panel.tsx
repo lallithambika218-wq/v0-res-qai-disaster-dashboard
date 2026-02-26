@@ -24,6 +24,7 @@ import {
 } from "lucide-react"
 import type { InputData } from "@/lib/types"
 import { AREAS } from "@/lib/types"
+import { useTranslation } from "@/lib/translations"
 
 interface InputPanelProps {
   input: InputData
@@ -33,6 +34,8 @@ interface InputPanelProps {
 }
 
 export function InputPanel({ input, onInputChange, onAnalyze, isLoading }: InputPanelProps) {
+  const { t } = useTranslation()
+
   const updateField = <K extends keyof InputData>(field: K, value: InputData[K]) => {
     onInputChange({ ...input, [field]: value })
   }
@@ -42,7 +45,7 @@ export function InputPanel({ input, onInputChange, onAnalyze, isLoading }: Input
       <CardHeader className="pb-4">
         <CardTitle className="flex items-center gap-2 text-lg text-card-foreground">
           <Activity className="h-5 w-5 text-primary" />
-          Analysis Parameters
+          {t.analysisParameters}
         </CardTitle>
       </CardHeader>
       <CardContent className="flex flex-col gap-5">
@@ -50,11 +53,11 @@ export function InputPanel({ input, onInputChange, onAnalyze, isLoading }: Input
         <div className="flex flex-col gap-2">
           <Label className="flex items-center gap-1.5 text-sm font-medium text-card-foreground">
             <MapPin className="h-3.5 w-3.5 text-primary" />
-            Area / Zone
+            {t.areaZone}
           </Label>
           <Select value={input.area} onValueChange={(v) => updateField("area", v)}>
             <SelectTrigger className="bg-background text-foreground">
-              <SelectValue placeholder="Select zone" />
+              <SelectValue placeholder={t.selectZone} />
             </SelectTrigger>
             <SelectContent>
               {AREAS.map((area) => (
@@ -73,7 +76,7 @@ export function InputPanel({ input, onInputChange, onAnalyze, isLoading }: Input
           <div className="flex flex-col gap-2">
             <Label className="flex items-center gap-1.5 text-sm font-medium text-card-foreground">
               <CloudRain className="h-3.5 w-3.5 text-primary" />
-              Rainfall (mm)
+              {t.rainfall}
             </Label>
             <Input
               type="number"
@@ -87,7 +90,7 @@ export function InputPanel({ input, onInputChange, onAnalyze, isLoading }: Input
           <div className="flex flex-col gap-2">
             <Label className="flex items-center gap-1.5 text-sm font-medium text-card-foreground">
               <Mountain className="h-3.5 w-3.5 text-primary" />
-              Elevation (m)
+              {t.elevation}
             </Label>
             <Input
               type="number"
@@ -101,7 +104,7 @@ export function InputPanel({ input, onInputChange, onAnalyze, isLoading }: Input
           <div className="flex flex-col gap-2">
             <Label className="flex items-center gap-1.5 text-sm font-medium text-card-foreground">
               <Users className="h-3.5 w-3.5 text-primary" />
-              Population
+              {t.population}
             </Label>
             <Input
               type="number"
@@ -115,7 +118,7 @@ export function InputPanel({ input, onInputChange, onAnalyze, isLoading }: Input
           <div className="flex flex-col gap-2">
             <Label className="flex items-center gap-1.5 text-sm font-medium text-card-foreground">
               <Waves className="h-3.5 w-3.5 text-primary" />
-              Coastal Dist. (km)
+              {t.coastalDist}
             </Label>
             <Input
               type="number"
@@ -135,7 +138,7 @@ export function InputPanel({ input, onInputChange, onAnalyze, isLoading }: Input
           <Label className="flex items-center justify-between text-sm font-medium text-card-foreground">
             <span className="flex items-center gap-1.5">
               <Activity className="h-3.5 w-3.5 text-primary" />
-              Disaster Intensity
+              {t.disasterIntensity}
             </span>
             <span className="font-mono text-sm font-semibold text-primary">
               +{input.disasterIntensity}%
@@ -150,7 +153,7 @@ export function InputPanel({ input, onInputChange, onAnalyze, isLoading }: Input
             className="py-1"
           />
           <p className="text-xs text-muted-foreground leading-relaxed">
-            Simulate increased rainfall or disaster severity to recalculate risk projections.
+            {t.whatIfHint}
           </p>
         </div>
 
@@ -163,12 +166,12 @@ export function InputPanel({ input, onInputChange, onAnalyze, isLoading }: Input
           {isLoading ? (
             <>
               <span className="h-4 w-4 animate-spin rounded-full border-2 border-primary-foreground border-t-transparent" />
-              Analyzing...
+              {t.analyzing}
             </>
           ) : (
             <>
               <Search className="h-4 w-4" />
-              Analyze Risk
+              {t.analyzeRisk}
             </>
           )}
         </Button>

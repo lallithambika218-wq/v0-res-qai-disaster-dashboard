@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Home, MapPin, ArrowUpRight, Users } from "lucide-react"
 import type { ShelterInfo } from "@/lib/types"
+import { useTranslation, translateSafety } from "@/lib/translations"
 import { cn } from "@/lib/utils"
 
 interface ShelterRecommendationProps {
@@ -11,12 +12,14 @@ interface ShelterRecommendationProps {
 }
 
 export function ShelterRecommendation({ shelters }: ShelterRecommendationProps) {
+  const { t } = useTranslation()
+
   return (
     <Card className="border-border/60 bg-card shadow-sm">
       <CardHeader className="pb-2">
         <CardTitle className="flex items-center gap-2 text-lg text-card-foreground">
           <Home className="h-5 w-5 text-primary" />
-          Shelter Recommendations
+          {t.shelterRecommendation}
         </CardTitle>
       </CardHeader>
       <CardContent>
@@ -58,7 +61,7 @@ export function ShelterRecommendation({ shelters }: ShelterRecommendationProps) 
                       : "bg-risk-high-bg text-risk-high border-risk-high/30"
                   )}
                 >
-                  {shelter.safetyStatus}
+                  {translateSafety(shelter.safetyStatus, t)}
                 </Badge>
               </div>
             </div>

@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { MapPin } from "lucide-react"
 import type { ZoneRisk } from "@/lib/types"
+import { useTranslation, translateRiskLevel } from "@/lib/translations"
 import { cn } from "@/lib/utils"
 import {
   BarChart,
@@ -32,12 +33,14 @@ const riskBadge: Record<string, string> = {
 }
 
 export function RiskVisualization({ zoneRisks }: RiskVisualizationProps) {
+  const { t } = useTranslation()
+
   return (
     <Card className="border-border/60 bg-card shadow-sm">
       <CardHeader className="pb-2">
         <CardTitle className="flex items-center gap-2 text-lg text-card-foreground">
           <MapPin className="h-5 w-5 text-primary" />
-          Risk Visualization by Zone
+          {t.riskVisByZone}
         </CardTitle>
       </CardHeader>
       <CardContent>
