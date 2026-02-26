@@ -17,6 +17,7 @@ export function DashboardHeader({ lastAnalyzed }: DashboardHeaderProps) {
           alt="ResQAI Logo"
           width={48}
           height={48}
+          priority
           className="rounded-lg"
           style={{ width: "auto", height: "auto" }}
         />
