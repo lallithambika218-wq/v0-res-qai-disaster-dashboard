@@ -1,272 +1,83 @@
-"use client"
+import Link from "next/link"
+import Image from "next/image"
+import { ArrowRight, Shield, Radio, Activity } from "lucide-react"
+import { Button } from "@/components/ui/button"
 
-import { useState, useCallback, useEffect } from "react"
-import { DashboardHeader } from "@/components/dashboard/dashboard-header"
-import { OfflineBanner } from "@/components/dashboard/offline-banner"
-import { InputPanel } from "@/components/dashboard/input-panel"
-import { KPICards } from "@/components/dashboard/kpi-cards"
-import { RiskVisualization } from "@/components/dashboard/risk-visualization"
-import { ResourceAllocation } from "@/components/dashboard/resource-allocation"
-import { ShelterRecommendation } from "@/components/dashboard/shelter-recommendation"
-import { AlertPanel } from "@/components/dashboard/alert-panel"
-import type { AlertItem } from "@/components/dashboard/alert-panel"
-import { HistoryPanel } from "@/components/dashboard/history-panel"
-import type { HistoryEntry } from "@/components/dashboard/history-panel"
-import { analyzeRisk } from "@/lib/analysis-engine"
-import { DEFAULT_INPUT } from "@/lib/types"
-import type { InputData, AnalysisResult } from "@/lib/types"
-import { cn } from "@/lib/utils"
-
-const INITIAL_RESULT: AnalysisResult = analyzeRisk(DEFAULT_INPUT)
-
-export default function DashboardPage() {
-  const [input, setInput] = useState<InputData>(DEFAULT_INPUT)
-  const [result, setResult] = useState<AnalysisResult>(INITIAL_RESULT)
-  const [isLoading, setIsLoading] = useState(false)
-  const [lastAnalyzed, setLastAnalyzed] = useState<string | null>(null)
-
-  // Online / offline
-  const [isOnline, setIsOnline] = useState(true)
-  useEffect(() => {
-    setIsOnline(navigator.onLine)
-    const goOnline = () => setIsOnline(true)
-    const goOffline = () => setIsOnline(false)
-    window.addEventListener("online", goOnline)
-    window.addEventListener("offline", goOffline)
-    return () => {
-      window.removeEventListener("online", goOnline)
-      window.removeEventListener("offline", goOffline)
-    }
-  }, [])
-
-  // Panels
-  const [alertsOpen, setAlertsOpen] = useState(false)
-  const [historyOpen, setHistoryOpen] = useState(false)
-  const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false)
-
-  // Alerts
-  const [alerts, setAlerts] = useState<AlertItem[]>([
-    {
-      id: "initial-1",
-      timestamp: "System Init",
-      message: "ResQAI system initialized. Ready for risk analysis.",
-      severity: "info",
-    },
-  ])
-
-  // History
-  const [history, setHistory] = useState<HistoryEntry[]>([])
-  const [savedResults, setSavedResults] = useState<Record<string, { input: InputData; result: AnalysisResult }>>({})
-
-  const getTimestamp = () =>
-    new Date().toLocaleTimeString("en-US", {
-      hour: "2-digit",
-      minute: "2-digit",
-      second: "2-digit",
-    })
-
-  const addAlert = useCallback((message: string, severity: AlertItem["severity"]) => {
-    setAlerts((prev) => [
-      {
-        id: `alert-${Date.now()}`,
-        timestamp: new Date().toLocaleTimeString("en-US", {
-          hour: "2-digit",
-          minute: "2-digit",
-        }),
-        message,
-        severity,
-      },
-      ...prev,
-    ])
-  }, [])
-
-  const handleAnalyze = useCallback(async () => {
-    setIsLoading(true)
-    try {
-      const response = await fetch("/api/analyze", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(input),
-      })
-      if (!response.ok) throw new Error("Analysis failed")
-      const data: AnalysisResult = await response.json()
-      setResult(data)
-
-      const ts = getTimestamp()
-      setLastAnalyzed(ts)
-
-      // Save to history
-      const entryId = `h-${Date.now()}`
-      setHistory((prev) => [
-        {
-          id: entryId,
-          timestamp: ts,
-          area: input.area,
-          riskLevel: data.riskLevel,
-          riskScore: data.riskScore,
-        },
-        ...prev,
-      ])
-      setSavedResults((prev) => ({ ...prev, [entryId]: { input: { ...input }, result: data } }))
-
-      // Generate alerts based on risk level
-      if (data.riskLevel === "High") {
-        addAlert(
-          `High Flood Risk Detected in ${input.area}. Immediate Action Required.`,
-          "critical"
-        )
-      } else if (data.riskLevel === "Medium") {
-        addAlert(
-          `Elevated risk detected in ${input.area}. Monitor closely.`,
-          "warning"
-        )
-      }
-    } catch {
-      const fallback = analyzeRisk(input)
-      setResult(fallback)
-
-      const ts = getTimestamp()
-      setLastAnalyzed(ts)
-
-      const entryId = `h-${Date.now()}`
-      setHistory((prev) => [
-        {
-          id: entryId,
-          timestamp: ts,
-          area: input.area,
-          riskLevel: fallback.riskLevel,
-          riskScore: fallback.riskScore,
-        },
-        ...prev,
-      ])
-      setSavedResults((prev) => ({ ...prev, [entryId]: { input: { ...input }, result: fallback } }))
-
-      if (fallback.riskLevel === "High") {
-        addAlert(
-          `High Flood Risk Detected in ${input.area}. Immediate Action Required.`,
-          "critical"
-        )
-      }
-    } finally {
-      setIsLoading(false)
-    }
-  }, [input, addAlert])
-
-  const handleRestore = useCallback(
-    (id: string) => {
-      const saved = savedResults[id]
-      if (saved) {
-        setInput(saved.input)
-        setResult(saved.result)
-        setLastAnalyzed(getTimestamp())
-        setHistoryOpen(false)
-        addAlert(`Restored analysis for ${saved.input.area}.`, "info")
-      }
-    },
-    [savedResults, addAlert]
-  )
-
-  const handleSendAlert = useCallback(() => {
-    addAlert("Alert dispatched to all field teams in the active zone.", "info")
-  }, [addAlert])
-
-  const criticalCount = alerts.filter((a) => a.severity === "critical").length
-
+export default function HomePage() {
   return (
-    <div className="flex min-h-screen flex-col bg-background">
-      <DashboardHeader
-        lastAnalyzed={lastAnalyzed}
-        isOnline={isOnline}
-        alertCount={criticalCount}
-        onToggleAlerts={() => setAlertsOpen((o) => !o)}
-        onToggleHistory={() => setHistoryOpen((o) => !o)}
-        onToggleMobileSidebar={() => setMobileSidebarOpen((o) => !o)}
-        mobileSidebarOpen={mobileSidebarOpen}
+    <main className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden bg-background">
+      {/* Subtle background grid pattern */}
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-0 bg-[linear-gradient(to_right,var(--color-border)_1px,transparent_1px),linear-gradient(to_bottom,var(--color-border)_1px,transparent_1px)] bg-[size:4rem_4rem] opacity-30"
       />
 
-      <OfflineBanner isOnline={isOnline} />
+      {/* Soft radial glow behind logo */}
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-[32rem] w-[32rem] rounded-full bg-primary/8"
+      />
 
-      <div className="flex flex-1 flex-col lg:flex-row">
-        {/* Mobile sidebar overlay */}
-        {mobileSidebarOpen && (
+      <div className="relative z-10 flex flex-col items-center gap-8 px-6 text-center">
+        {/* Logo */}
+        <div className="relative">
           <div
-            className="fixed inset-0 z-30 bg-foreground/20 lg:hidden"
-            onClick={() => setMobileSidebarOpen(false)}
+            aria-hidden="true"
+            className="absolute -inset-4 rounded-full bg-primary/5 blur-xl"
           />
-        )}
-
-        {/* Left sidebar - Input Panel */}
-        <aside
-          className={cn(
-            "shrink-0 border-r border-border bg-card",
-            // Desktop: always visible
-            "hidden lg:block lg:w-80 xl:w-[22rem]",
-            // Mobile: slide-in overlay
-            mobileSidebarOpen &&
-              "fixed inset-y-0 left-0 z-30 block w-80 animate-in slide-in-from-left shadow-xl lg:static lg:shadow-none lg:animate-none"
-          )}
-        >
-          <div className="h-full overflow-y-auto p-4 lg:sticky lg:top-14 lg:max-h-[calc(100vh-3.5rem)] lg:p-5">
-            <InputPanel
-              input={input}
-              onInputChange={setInput}
-              onAnalyze={handleAnalyze}
-              isLoading={isLoading}
-            />
-          </div>
-        </aside>
-
-        {/* Mobile: inline input (only when sidebar closed) */}
-        <div className={cn("p-4 lg:hidden", mobileSidebarOpen && "hidden")}>
-          <InputPanel
-            input={input}
-            onInputChange={setInput}
-            onAnalyze={handleAnalyze}
-            isLoading={isLoading}
+          <Image
+            src="/images/resqai-logo.png"
+            alt="ResQAI Logo"
+            width={160}
+            height={160}
+            priority
+            className="relative h-32 w-32 rounded-2xl object-contain sm:h-40 sm:w-40"
           />
         </div>
 
-        {/* Main content */}
-        <main className="flex flex-1 flex-col gap-5 p-4 sm:p-5 lg:p-6">
-          {/* KPI Cards */}
-          <section aria-label="Key performance indicators">
-            <KPICards
-              riskScore={result.riskScore}
-              riskLevel={result.riskLevel}
-              confidence={result.confidence}
-            />
-          </section>
+        {/* Name & tagline */}
+        <div className="flex flex-col items-center gap-3">
+          <h1 className="text-balance text-5xl font-bold tracking-tight text-foreground sm:text-6xl lg:text-7xl">
+            Res<span className="text-primary">Q</span>AI
+          </h1>
+          <p className="text-lg font-medium tracking-wide text-muted-foreground sm:text-xl">
+            Disaster Response AI
+          </p>
+        </div>
 
-          {/* Risk Visualization */}
-          <section aria-label="Risk visualization">
-            <RiskVisualization zoneRisks={result.zoneRisks} />
-          </section>
+        {/* Brief description */}
+        <p className="max-w-md text-pretty text-base leading-relaxed text-muted-foreground/80">
+          AI-powered, offline-capable disaster management platform for real-time
+          flood risk analysis, resource allocation, and shelter recommendations.
+        </p>
 
-          {/* Resource Allocation and Shelter */}
-          <div className="grid grid-cols-1 gap-5 xl:grid-cols-2">
-            <section aria-label="Resource allocation">
-              <ResourceAllocation resources={result.resources} />
-            </section>
-            <section aria-label="Shelter recommendations">
-              <ShelterRecommendation shelters={result.shelters} />
-            </section>
-          </div>
-        </main>
+        {/* CTA */}
+        <Link href="/dashboard">
+          <Button
+            size="lg"
+            className="group gap-2 rounded-full px-8 text-base font-semibold shadow-lg shadow-primary/20 transition-all hover:shadow-xl hover:shadow-primary/30"
+          >
+            Open Dashboard
+            <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
+          </Button>
+        </Link>
+
+        {/* Feature badges */}
+        <div className="flex flex-wrap items-center justify-center gap-3 pt-2">
+          <span className="inline-flex items-center gap-1.5 rounded-full border border-border bg-card px-3 py-1.5 text-xs font-medium text-muted-foreground shadow-sm">
+            <Shield className="h-3.5 w-3.5 text-primary" />
+            SDG 13 &amp; 11
+          </span>
+          <span className="inline-flex items-center gap-1.5 rounded-full border border-border bg-card px-3 py-1.5 text-xs font-medium text-muted-foreground shadow-sm">
+            <Radio className="h-3.5 w-3.5 text-primary" />
+            Offline-Capable
+          </span>
+          <span className="inline-flex items-center gap-1.5 rounded-full border border-border bg-card px-3 py-1.5 text-xs font-medium text-muted-foreground shadow-sm">
+            <Activity className="h-3.5 w-3.5 text-primary" />
+            AI-Powered
+          </span>
+        </div>
       </div>
-
-      {/* Overlay panels */}
-      <AlertPanel
-        alerts={alerts}
-        isOpen={alertsOpen}
-        onClose={() => setAlertsOpen(false)}
-        onSendAlert={handleSendAlert}
-      />
-      <HistoryPanel
-        entries={history}
-        isOpen={historyOpen}
-        onClose={() => setHistoryOpen(false)}
-        onRestore={handleRestore}
-      />
-    </div>
+    </main>
   )
 }
