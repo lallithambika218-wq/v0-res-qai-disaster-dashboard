@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useCallback } from "react"
+import { useState, useCallback, useEffect } from "react"
 import { DashboardHeader } from "@/components/dashboard/dashboard-header"
 import { InputPanel } from "@/components/dashboard/input-panel"
 import { KPICards } from "@/components/dashboard/kpi-cards"
@@ -11,13 +11,12 @@ import { analyzeRisk } from "@/lib/analysis-engine"
 import { DEFAULT_INPUT } from "@/lib/types"
 import type { InputData, AnalysisResult } from "@/lib/types"
 
-function getInitialResult(): AnalysisResult {
-  return analyzeRisk(DEFAULT_INPUT)
-}
+// Stable initial result computed from DEFAULT_INPUT (deterministic, no randomness)
+const INITIAL_RESULT: AnalysisResult = analyzeRisk(DEFAULT_INPUT)
 
 export default function DashboardPage() {
   const [input, setInput] = useState<InputData>(DEFAULT_INPUT)
-  const [result, setResult] = useState<AnalysisResult>(getInitialResult)
+  const [result, setResult] = useState<AnalysisResult>(INITIAL_RESULT)
   const [isLoading, setIsLoading] = useState(false)
   const [lastAnalyzed, setLastAnalyzed] = useState<string | null>(null)
 

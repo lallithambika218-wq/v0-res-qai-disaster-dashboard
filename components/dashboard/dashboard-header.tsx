@@ -18,6 +18,7 @@ export function DashboardHeader({ lastAnalyzed }: DashboardHeaderProps) {
           width={48}
           height={48}
           className="rounded-lg"
+          style={{ width: "auto", height: "auto" }}
         />
         <div className="flex flex-col">
           <h1 className="text-xl font-bold tracking-tight text-card-foreground">

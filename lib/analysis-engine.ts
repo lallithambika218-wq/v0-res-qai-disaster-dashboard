@@ -31,8 +31,10 @@ export function analyzeRisk(input: InputData): AnalysisResult {
   const riskLevel: "Low" | "Medium" | "High" =
     riskScore >= 65 ? "High" : riskScore >= 35 ? "Medium" : "Low"
 
+  // Deterministic confidence based on inputs (avoids hydration mismatch from Math.random)
+  const inputHash = (input.rainfall * 7 + input.elevation * 3 + input.population * 0.01 + input.coastalDistance * 2 + input.disasterIntensity) % 18
   const confidence = clamp(
-    Math.round(72 + Math.random() * 18 + (input.rainfall > 100 ? 5 : 0)),
+    Math.round(72 + inputHash + (input.rainfall > 100 ? 5 : 0)),
     60,
     99
   )
