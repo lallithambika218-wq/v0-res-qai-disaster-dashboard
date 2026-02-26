@@ -34,8 +34,8 @@ export function ResourceAllocation({ resources }: ResourceAllocationProps) {
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="rounded-lg border border-border/60 overflow-hidden">
-          <Table>
+        <div className="rounded-lg border border-border/60 overflow-x-auto">
+          <Table className="min-w-[400px]">
             <TableHeader>
               <TableRow className="bg-secondary/50 hover:bg-secondary/50">
                 <TableHead className="text-card-foreground font-semibold">Resource Type</TableHead>

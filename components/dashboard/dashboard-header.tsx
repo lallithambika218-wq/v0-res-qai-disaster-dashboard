@@ -1,52 +1,114 @@
 "use client"
 
+import { useState } from "react"
 import Image from "next/image"
-import { Bell, Radio } from "lucide-react"
+import { Bell, Radio, WifiOff, Menu, X, History } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
+import { cn } from "@/lib/utils"
 
 interface DashboardHeaderProps {
   lastAnalyzed: string | null
+  isOnline: boolean
+  alertCount: number
+  onToggleAlerts: () => void
+  onToggleHistory: () => void
+  onToggleMobileSidebar: () => void
+  mobileSidebarOpen: boolean
 }
 
-export function DashboardHeader({ lastAnalyzed }: DashboardHeaderProps) {
+export function DashboardHeader({
+  lastAnalyzed,
+  isOnline,
+  alertCount,
+  onToggleAlerts,
+  onToggleHistory,
+  onToggleMobileSidebar,
+  mobileSidebarOpen,
+}: DashboardHeaderProps) {
   return (
-    <header className="flex items-center justify-between border-b border-border bg-card px-6 py-3">
+    <header className="sticky top-0 z-40 flex items-center justify-between border-b border-border bg-card px-4 py-2.5 shadow-sm sm:px-6">
       <div className="flex items-center gap-3">
+        {/* Mobile sidebar toggle */}
+        <Button
+          variant="ghost"
+          size="icon"
+          className="lg:hidden h-9 w-9 text-muted-foreground"
+          onClick={onToggleMobileSidebar}
+          aria-label={mobileSidebarOpen ? "Close sidebar" : "Open sidebar"}
+        >
+          {mobileSidebarOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+        </Button>
+
         <Image
           src="/images/resqai-logo.png"
           alt="ResQAI Logo"
-          width={48}
-          height={48}
+          width={36}
+          height={36}
           priority
-          className="rounded-lg"
-          style={{ width: "auto", height: "auto" }}
+          className="h-9 w-9 rounded-lg object-contain"
         />
         <div className="flex flex-col">
-          <h1 className="text-xl font-bold tracking-tight text-card-foreground">
+          <h1 className="text-lg font-bold tracking-tight text-card-foreground leading-tight">
             ResQAI
           </h1>
-          <p className="text-xs text-muted-foreground">
+          <p className="hidden text-xs text-muted-foreground sm:block">
             Disaster Response AI Dashboard
           </p>
         </div>
       </div>
-      <div className="flex items-center gap-4">
+
+      <div className="flex items-center gap-2 sm:gap-3">
         {lastAnalyzed && (
-          <span className="hidden text-xs text-muted-foreground sm:inline-flex items-center gap-1">
+          <span className="hidden text-xs text-muted-foreground lg:inline-flex items-center gap-1">
             Last analyzed: {lastAnalyzed}
           </span>
         )}
-        <Badge variant="outline" className="gap-1.5 border-risk-low/40 bg-risk-low-bg text-risk-low text-xs">
-          <Radio className="h-3 w-3" />
-          System Online
+
+        {/* Online / Offline indicator */}
+        <Badge
+          variant="outline"
+          className={cn(
+            "gap-1.5 text-xs hidden sm:inline-flex",
+            isOnline
+              ? "border-risk-low/40 bg-risk-low-bg text-risk-low"
+              : "border-risk-high/40 bg-risk-high-bg text-risk-high"
+          )}
+        >
+          {isOnline ? (
+            <Radio className="h-3 w-3" />
+          ) : (
+            <WifiOff className="h-3 w-3" />
+          )}
+          {isOnline ? "Online" : "Offline"}
         </Badge>
-        <button
-          className="relative flex h-9 w-9 items-center justify-center rounded-lg border border-border bg-background text-muted-foreground transition-colors hover:bg-secondary hover:text-card-foreground"
+
+        {/* History button */}
+        <Button
+          variant="ghost"
+          size="icon"
+          className="relative h-9 w-9 text-muted-foreground hover:text-card-foreground"
+          onClick={onToggleHistory}
+          aria-label="Analysis history"
+        >
+          <History className="h-4 w-4" />
+        </Button>
+
+        {/* Notification bell */}
+        <Button
+          variant="ghost"
+          size="icon"
+          className="relative h-9 w-9 text-muted-foreground hover:text-card-foreground"
+          onClick={onToggleAlerts}
           aria-label="Notifications"
         >
           <Bell className="h-4 w-4" />
-          <span className="absolute -right-0.5 -top-0.5 flex h-2.5 w-2.5 items-center justify-center rounded-full bg-risk-high" />
-        </button>
+          {alertCount > 0 && (
+            <span className="absolute -right-0.5 -top-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-risk-high text-[10px] font-bold text-[#fff]">
+              {alertCount > 9 ? "9+" : alertCount}
+            </span>
+          )}
+        </Button>
       </div>
     </header>
   )
