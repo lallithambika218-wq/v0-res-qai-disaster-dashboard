@@ -8,7 +8,7 @@ export type Language = "en" | "ta" | "hi"
 export const LANGUAGE_OPTIONS: { value: Language; label: string; nativeLabel: string }[] = [
   { value: "en", label: "English", nativeLabel: "English" },
   { value: "ta", label: "Tamil", nativeLabel: "தமிழ்" },
-  { value: "hi", label: "Hindi", nativeLabel: "हिन्दी" },
+  { value: "hi", label: "Hindi", nativeLabel: "हிन्दी" },
 ]
 
 // ---------- Translation keys ----------
